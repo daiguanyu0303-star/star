@@ -14,7 +14,7 @@ import re
 import json
 from werkzeug.exceptions import RequestEntityTooLarge
 
-# -------------------------- 基础配置 --------------------------
+# -------------------------- 基础配置（加点注释） --------------------------
 app = Flask(__name__)
 CORS(app)
 load_dotenv()
