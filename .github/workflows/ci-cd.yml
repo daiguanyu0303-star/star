@@ -1,70 +1,38 @@
-# 工作流名称（显示在 GitHub Actions 页面）
 name: Employee Management CI/CD
 
-# 触发条件：main分支有代码提交/PR时自动运行
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-# 定义任务：先测试，测试通过后部署
 jobs:
-  # 任务1：自动测试（验证代码无语法错误、核心功能可用）
   test:
-    runs-on: ubuntu-latest  # 运行环境：最新版 Ubuntu
+    runs-on: ubuntu-latest
     steps:
-      # 步骤1：拉取 GitHub 仓库代码
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 步骤2：配置 Python 环境（和 Replit 一致的 3.11 版本）
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 步骤3：安装项目依赖
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 步骤4：运行自动化测试（校验核心功能）
       - name: Run tests
         run: |
           python -c "
-          # 1. 校验依赖导入
           import flask, flask_jwt_extended, flask_cors, bcrypt, PIL, replit
           print('✅ 所有依赖导入成功')
-          
-          # 2. 校验 Flask 应用初始化
           from flask import Flask
           app = Flask(__name__)
           print('✅ Flask 应用初始化成功')
-          
-          # 3. 校验密码加密功能
           import bcrypt
           hashed = bcrypt.hashpw(b'admin123', bcrypt.gensalt())
           assert bcrypt.checkpw(b'admin123', hashed)
           print('✅ 密码加密/验证功能正常')
           "
-
-  # 任务2：自动部署到 Replit（仅测试通过后运行）
-  deploy:
-    needs: test  # 依赖 test 任务成功完成
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'  # 仅 main 分支提交触发部署
-    steps:
-      # 步骤1：拉取代码
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # 步骤2：部署到 Replit（使用官方 Action）
-      - name: Deploy to Replit
-        uses: replit/action-deploy@v1
-        with:
-          replit-api-token: ${{ secrets.REPLIT_API_TOKEN }}
-          replit-username: ${{ secrets.REPLIT_USERNAME }}
-          replit-repl-slug: ${{ secrets.REPLIT_REPL_SLUG }}
-          replit-workspace: ./  # 代码根目录
